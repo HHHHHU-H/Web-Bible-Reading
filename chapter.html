@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>章节选择</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <div class="mb-4 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <a href="index.html" class="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm">返回总览</a>
+            </div>
+            
+            <div class="flex-1 text-center">
+                <h1 id="book-title" class="text-3xl font-bold text-gray-800"></h1>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <!-- 空的占位区域，保持与verse.html布局一致 -->
+                <div class="w-10 h-10"></div>
+            </div>
+        </div>
+        <div id="chapter-list" class="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-4">
+            <!-- Chapters will be dynamically inserted here -->
+        </div>
+    </div>
+    <script src="js/chapter.js"></script>
+</body>
+</html>

@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>经节朗读</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- First Row: Navigation and Settings -->
+        <div class="mb-4 flex items-center justify-between top-controls">
+            <div class="flex items-center space-x-2">
+                <a href="index.html" class="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm">返回总览</a>
+                <a id="back-to-chapter" href="#" class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm">返回章节</a>
+            </div>
+            
+            <div class="flex-1 text-center">
+                <h1 id="chapter-title" class="text-xl font-bold text-gray-800">加载中...</h1>
+            </div>
+            
+            <div class="relative">
+                <button id="settings-toggle" class="p-2 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </button>
+                
+                <!-- Settings Dropdown -->
+                <div id="settings-dropdown" class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl border z-50 hidden">
+                    <div class="p-4">
+                        <h3 class="text-lg font-semibold mb-3">设置</h3>
+                        
+                        <!-- Display Mode -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">显示模式</label>
+                            <select id="display-mode" class="w-full p-2 border border-gray-300 rounded-md">
+                                <option value="chinese">中文</option>
+                                <option value="english">英文</option>
+                                <option value="bilingual">双语</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Voice Settings -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">语音选择</label>
+                            <select id="voice-select" class="w-full p-2 border border-gray-300 rounded-md">
+                                <!-- Voices will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        
+                        <!-- Volume -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">音量: <span id="volume-value">1.0</span></label>
+                            <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="1.0" class="w-full">
+                        </div>
+                        
+                        <!-- Speed -->
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">倍速: <span id="rate-value">1.2</span></label>
+                            <input type="range" id="rate-slider" min="0.5" max="2" step="0.1" value="1.2" class="w-full">
+                        </div>
+                        
+                        <!-- Usage Instructions -->
+                        <div class="mb-4 border-t pt-4">
+                            <button id="usage-instructions-btn" class="w-full text-left p-3 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-blue-700">📖 使用说明</span>
+                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </div>
+                                <p class="text-xs text-blue-600 mt-1">查看详细功能说明和使用指南</p>
+                            </button>
+                        </div>
+                        
+                        <!-- Author Information -->
+                        <div class="border-t pt-3">
+                            <p class="text-xs text-gray-500 text-center">
+                                作者：H (宁德古田召会)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Row: Playback Controls -->
+        <div class="mb-6 flex items-center justify-between top-controls controls-row">
+            <div class="flex items-center space-x-2">
+                <!-- Playback Mode Dropdown -->
+                <div class="relative">
+                    <button id="playback-mode-toggle" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 flex items-center">
+                        <span id="current-mode-text">章节朗读</span>
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    
+                    <div id="playback-mode-dropdown" class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border z-40 hidden">
+                        <div class="p-2">
+                            <button class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded" data-mode="chapter">章节朗读</button>
+                            <button class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded" data-mode="verse">经节朗读</button>
+                            <button class="w-full text-left px-3 py-2 hover:bg-gray-100 rounded" data-mode="playlist">自定义列表</button>
+                        </div>
+                    </div>
+                </div>
+                
+
+                <!-- Settings Button -->
+                <button id="settings-btn" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">详细设置</button>
+                
+                <!-- Verse List Playback Button (only shown in verse mode) -->
+                <button id="verse-list-playback" class="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 hidden">经节列表播放</button>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button id="prev-chapter" class="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">上一章</button>
+                <button id="play-pause" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">播放</button>
+                <button id="next-chapter" class="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">下一章</button>
+            </div>
+        </div>
+
+        <!-- Detailed Settings Modal -->
+        <div id="detailed-settings-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">详细设置</h2>
+                            <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Chapter Mode Settings -->
+                        <div id="chapter-mode-settings" class="space-y-4">
+                            <h3 class="text-lg font-semibold">章节播放设置</h3>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">读完本章后的行为</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="chapter-end-action" value="next" checked class="mr-2">
+                                        <span>顺序到下一章朗读</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="chapter-end-action" value="loop" class="mr-2">
+                                        <span>循环朗读本章</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="chapter-end-action" value="random" class="mr-2">
+                                        <span>随机跳转一章朗读</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Verse Mode Settings -->
+                        <div id="verse-mode-settings" class="space-y-4 hidden">
+                            <h3 class="text-lg font-semibold">经节朗读设置</h3>
+                            
+                            <!-- 播放模式 -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">播放模式</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="verse-playback-mode" value="single-loop" checked class="mr-2">
+                                        <span>单经节循环</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="verse-playback-mode" value="chapter-random" class="mr-2">
+                                        <span>当前章节随机播放</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- 循环次数 -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">循环次数</label>
+                                <div class="space-y-2">
+                                    <div class="flex items-center space-x-2 flex-wrap">
+                                        <button type="button" class="loop-count-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm" data-count="1">1次</button>
+                                        <button type="button" class="loop-count-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm" data-count="3">3次</button>
+                                        <button type="button" class="loop-count-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm" data-count="5">5次</button>
+                                        <button type="button" id="infinite-loop-btn" class="loop-count-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm" data-count="infinite">无限</button>
+                                        <button type="button" class="loop-count-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm" data-count="custom">自定义</button>
+                                    </div>
+                                    <div id="custom-count-input" class="hidden">
+                                        <input type="number" id="custom-loop-count" min="1" value="1" placeholder="输入次数" class="w-24 p-2 border border-gray-300 rounded-md text-sm">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Playlist Mode Settings -->
+                        <div id="playlist-mode-settings" class="space-y-4 hidden">
+                            <h3 class="text-lg font-semibold">播放列表设置</h3>
+                            
+                            <!-- 播放列表显示 -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">当前播放列表</label>
+                                <div id="detailed-playlist-display" class="max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                    <!-- 播放列表内容将在这里显示 -->
+                                </div>
+                            </div>
+                            
+                            <!-- 播放模式 -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">播放模式</label>
+                                <div class="space-y-2">
+                                    <label class="flex items-center text-sm">
+                                        <input type="radio" name="detailed-playlist-mode" value="sequential" class="mr-2">
+                                        顺序播放
+                                    </label>
+                                    <label class="flex items-center text-sm">
+                                        <input type="radio" name="detailed-playlist-mode" value="loop" class="mr-2" checked>
+                                        列表循环
+                                    </label>
+                                    <label class="flex items-center text-sm">
+                                        <input type="radio" name="detailed-playlist-mode" value="random" class="mr-2">
+                                        随机播放
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex justify-end space-x-2">
+                            <button id="save-settings" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">保存设置</button>
+                            <button id="cancel-settings" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">取消</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verse List Playback Modal -->
+        <div id="verse-list-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-lg font-bold">当前章节经节选择</h2>
+                            <button id="close-verse-list-modal" class="text-gray-500 hover:text-gray-700">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Current Chapter Verses -->
+                        <div>
+                            <h3 class="text-base font-semibold mb-2" id="current-chapter-title">当前章节经节</h3>
+                            <div class="h-64 overflow-y-auto border border-gray-200 rounded p-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+                                <div id="chapter-verses-list" class="space-y-2">
+                                    <!-- Current chapter verses will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bible Navigation Modal -->
+        <div id="bible-navigation-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[100]">
+            <div class="flex items-center justify-center min-h-screen p-4">
+                <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h2 class="text-xl font-bold">选择圣经章节</h2>
+                            <button id="close-bible-navigation" class="text-gray-500 hover:text-gray-700">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Testament Selection -->
+                        <div class="mb-4">
+                            <div class="flex space-x-2">
+                                <button id="old-testament-btn" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 active">旧约</button>
+                                <button id="new-testament-btn" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">新约</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Books Grid -->
+                        <div class="mb-4" id="books-section">
+                            <div class="flex justify-between items-center mb-2 cursor-pointer" onclick="toggleSection('books')">
+                                <h3 class="text-lg font-semibold">选择书卷</h3>
+                                <svg id="books-arrow" class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                            <div id="books-content" class="flex flex-wrap gap-2">
+                                <div id="books-grid" class="flex flex-wrap gap-2 w-full">
+                                    <!-- Books will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chapters -->
+                        <div class="mb-4" id="chapters-section" style="display: none;">
+                            <div class="flex justify-between items-center mb-2 cursor-pointer" onclick="toggleSection('chapters')">
+                                <h3 class="text-lg font-semibold">选择章节</h3>
+                                <svg id="chapters-arrow" class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </div>
+                            <div id="chapters-content" class="flex flex-wrap gap-2">
+                                <div id="chapters-grid" class="flex flex-wrap gap-2 w-full">
+                                    <!-- Chapters will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Verses -->
+                        <div class="mb-4" id="verses-section" style="display: none;">
+                            <h3 class="text-lg font-semibold mb-2">选择经节</h3>
+                            <div class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-3">
+                                <div id="navigation-verses-grid">
+                                    <!-- Verses will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex">
+            <!-- Default Chapter/Verse Mode -->
+            <div id="default-content" class="w-full space-y-2 overflow-y-auto" style="height: 60vh;">
+                <div id="verse-list" class="w-full space-y-2">
+                    <!-- Verses will be dynamically inserted here -->
+                </div>
+            </div>
+            
+        <!-- Verse List Playback Mode -->
+        <div id="playlist-content" class="w-full hidden">
+            <!-- Full-width playlist with toolbar above title -->
+            <div class="bg-gray-50 rounded-lg p-4 h-full flex flex-col" style="height: 60vh;">
+                <!-- Toolbar placed above the title -->
+                <div class="playlist-toolbar flex items-center justify-end mb-2 space-x-2">
+                    <button id="current-chapter-selection" class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm">当前章节经节选择</button>
+                    <button id="add-other-verses-playlist" class="px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm">添加其他经节</button>
+                    <button id="clear-playlist" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm">清空播放列表</button>
+                </div>
+                
+                <!-- Title -->
+                <h3 class="text-lg font-semibold mb-2 text-center">播放列表</h3>
+                
+                <!-- Playlist display area -->
+                <div id="playlist-display" class="space-y-2 overflow-y-auto flex-1">
+                    <div class="text-center text-gray-500 py-8">
+                        暂无播放列表，请添加经节
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Usage Instructions Modal -->
+    <div id="usage-instructions-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100" style="height: 70vh; max-height: 70vh; overscroll-behavior: contain;">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">📖 圣经朗读应用使用说明</h2>
+                        <button id="close-usage-modal" class="text-gray-500 hover:text-gray-700">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                <div class="space-y-6 text-gray-700">
+                    <section>
+                        <h3 class="text-lg font-semibold text-blue-600 mb-3">🎵 播放模式</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <h4 class="font-medium text-gray-800">章节朗读模式（默认）</h4>
+                                <p class="text-sm text-gray-600 ml-4">• 播放默认按序往下</p>
+                                <p class="text-sm text-gray-600 ml-4">• 顺序到下一章朗读：最后一节结束后自动播放下一章。 循环朗读本章：最后一节结束后自动播放第一节。 随机跳转一章朗读：最后一节结束后随机播放一章</p>
+                                <p class="text-sm text-gray-600 ml-4">• 默认设置：顺序到下一章朗读</p>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">经节朗读模式</h4>
+                                <p class="text-sm text-gray-600 ml-4">• 按经节顺序播放，可选择单经节循环或当前章节随机播放</p>
+                                <p class="text-sm text-gray-600 ml-4">• 可以设置循环次数，“当前章节随机播放+N次”效果是经节播放N次数后随机播放一节N次，重复此过程</p>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-gray-800">自定义播放列表</h4>
+                                <p class="text-sm text-gray-600 ml-4">• 可添加任意章节的经节组成播放列表</p>
+                                <p class="text-sm text-gray-600 ml-4">• 支持清空列表和设定播放顺序，次数，可以详细到每一节，列表可以拖动调整顺序</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="text-lg font-semibold text-blue-600 mb-3">🖥️ 显示模式</h3>
+                        <div class="space-y-2">
+                            <p><strong>中文模式（默认）：</strong>仅显示中文经文</p>
+                            <p><strong>英文模式：</strong>仅显示英文经文</p>
+                            <p><strong>双语模式：</strong>同时显示中英文经文对照（双语）</p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="text-lg font-semibold text-blue-600 mb-3">🎤 语音设置</h3>
+                        <div class="space-y-2">
+                            <p><strong>推荐中文语音：</strong></p>
+                            <ul class="ml-4 text-sm text-gray-600">
+                                <li>• Microsoft Huihui Desktop - Chinese (Simplified)</li>
+                                <li>• Microsoft Kangkang Desktop - Chinese (Simplified)</li>
+                                <li>• Microsoft Yaoyao Desktop - Chinese (Simplified)</li>
+                            </ul>
+                            <p class="text-sm text-gray-600 mt-2">注：如果系统中没有中文语音，请在Windows设置中下载安装中文语音包</p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="text-lg font-semibold text-blue-600 mb-3">🔧 音频控制</h3>
+                        <div class="space-y-2">
+                            <p><strong>音量调节：</strong>范围0.0-1.0，默认1.0（最大音量）</p>
+                            <p><strong>播放倍速：</strong>范围0.5x-2.0x，默认1.2x（推荐朗读速度）</p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="text-lg font-semibold text-blue-600 mb-3">⚙️ 设置保存</h3>
+                        <div class="space-y-2">
+                            <p>• 所有设置（显示模式、语音选择、音量、倍速）会自动保存到浏览器本地存储</p>
+                            <p>• 下次打开应用时会自动恢复上次的设置</p>
+                            <p>• 播放模式和循环次数设置也会被记住</p>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="text-lg font-semibold text-blue-600 mb-3">📱 操作指南</h3>
+                        <div class="space-y-2">
+                            <p><strong>基本操作：</strong></p>
+                            <ul class="ml-4 text-sm text-gray-600">
+                                <li>• 点击"播放"开始朗读当前章节</li>
+                                <li>• 使用"上一章"/"下一章"手动切换章节（不会自动播放）</li>
+                                <li>• 点击"经节朗读"切换到经节模式</li>
+                                <li>• 点击"详细设置"配置播放模式和循环次数</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h3 class="text-lg font-semibold text-blue-600 mb-3">⚠️ 重要提示</h3>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <p>• 首次使用时，浏览器可能会询问是否允许语音合成，请点击"允许"</p>
+                            <p>• 如果没有声音，请检查系统音量和浏览器音频权限</p>
+                            <p>• 建议使用Chrome、Edge等现代浏览器以获得最佳体验</p>
+                            <p>• 在章节朗读模式下，章节结束会自动播放下一章；手动切换章节不会自动播放</p>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/verse.js"></script>
+    <script src="js/verse_detailed_playlist.js"></script>
+</body>
+</html>
