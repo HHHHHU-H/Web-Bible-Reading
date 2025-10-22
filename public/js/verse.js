@@ -1164,7 +1164,15 @@ function setupVoices() {
         // 验证并设置默认voice
         if (voices.length > 0) {
             if (!settings.voice || !isValidVoice(settings.voice)) {
-                settings.voice = voices[0];
+                // 优先选择Microsoft Kangkang语音
+                const kangkangVoice = voices.find(v => v.name.includes('Kangkang'));
+                if (kangkangVoice) {
+                    settings.voice = kangkangVoice;
+                } else {
+                    // 如果没有找到Kangkang，则选择其他中文语音
+                    const chineseVoice = voices.find(v => v.lang.includes('zh'));
+                    settings.voice = chineseVoice || voices[0];
+                }
             }
             // 更新UI选择
             const currentVoiceIndex = voices.findIndex(voice => 
@@ -1463,14 +1471,20 @@ async function playSpecificRandomVerse(verseNumber) {
         currentUtterance.voice = settings.voice;
         console.log(`[随机播放] 使用设置的语音: ${settings.voice.name}`);
     } else {
-        // 尝试获取默认中文语音
+        // 尝试获取默认中文语音，优先选择Microsoft Kangkang
         const voices = speechSynthesis.getVoices();
-        const chineseVoice = voices.find(v => v.lang.includes('zh'));
-        if (chineseVoice) {
-            currentUtterance.voice = chineseVoice;
-            console.log(`[随机播放] 使用默认中文语音: ${chineseVoice.name}`);
+        const kangkangVoice = voices.find(v => v.name.includes('Kangkang'));
+        if (kangkangVoice) {
+            currentUtterance.voice = kangkangVoice;
+            console.log(`[随机播放] 使用默认Kangkang语音: ${kangkangVoice.name}`);
         } else {
-            console.log(`[随机播放] 未找到中文语音，使用浏览器默认语音`);
+            const chineseVoice = voices.find(v => v.lang.includes('zh'));
+            if (chineseVoice) {
+                currentUtterance.voice = chineseVoice;
+                console.log(`[随机播放] 使用默认中文语音: ${chineseVoice.name}`);
+            } else {
+                console.log(`[随机播放] 未找到中文语音，使用浏览器默认语音`);
+            }
         }
     }
     
